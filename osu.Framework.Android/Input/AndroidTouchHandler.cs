@@ -21,19 +21,27 @@ namespace osu.Framework.Android.Input
 
         private void handleTouches(object sender, View.TouchEventArgs e)
         {
-            PendingInputs.Enqueue(new MousePositionAbsoluteInput
+            int ptrId = e.Event.GetPointerId(e.Event.ActionIndex);
+            MouseButton button = ptrId == 0 ? MouseButton.Left : MouseButton.Right;
+
+            if (button == MouseButton.Left)
             {
-                Position = new osuTK.Vector2(e.Event.GetX() * view.ScaleX, e.Event.GetY() * view.ScaleY)
-            });
+                PendingInputs.Enqueue(new MousePositionAbsoluteInput
+                {
+                    Position = new osuTK.Vector2(e.Event.GetX() * view.ScaleX, e.Event.GetY() * view.ScaleY)
+                });
+            }
 
             switch (e.Event.Action & MotionEventActions.Mask)
             {
-                case MotionEventActions.Down:
                 case MotionEventActions.Move:
-                    PendingInputs.Enqueue(new MouseButtonInput(MouseButton.Left, true));
+                case MotionEventActions.Down:
+                case MotionEventActions.PointerDown:
+                    PendingInputs.Enqueue(new MouseButtonInput(button, true));
                     break;
                 case MotionEventActions.Up:
-                    PendingInputs.Enqueue(new MouseButtonInput(MouseButton.Left, false));
+                case MotionEventActions.PointerUp:
+                    PendingInputs.Enqueue(new MouseButtonInput(button, false));
                     break;
             }
         }
