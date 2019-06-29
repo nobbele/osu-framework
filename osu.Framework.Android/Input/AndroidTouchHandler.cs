@@ -21,8 +21,9 @@ namespace osu.Framework.Android.Input
 
         private void handleTouches(object sender, View.TouchEventArgs e)
         {
-            int ptrId = e.Event.GetPointerId(e.Event.ActionIndex);
-            MouseButton button = ptrId == 0 ? MouseButton.Left : MouseButton.Right;
+            int pointerId = e.Event.GetPointerId(e.Event.ActionIndex);
+
+            MouseButton button = getMouseButton(pointerId);
 
             if (button == MouseButton.Left)
             {
@@ -44,6 +45,18 @@ namespace osu.Framework.Android.Input
                     PendingInputs.Enqueue(new MouseButtonInput(button, false));
                     break;
             }
+        }
+
+        private MouseButton getMouseButton(int pointerId)
+        {
+            switch (pointerId)
+            {
+                case 0: return MouseButton.Left;
+                case 1: return MouseButton.Right;
+            }
+            //If its neither left nor right, return MouseButton.ButtonX where X = ptrId - 2
+            //Removes 2 to exclude left and right button
+            return MouseButton.Button1 + (pointerId - 2);
         }
 
         protected override void Dispose(bool disposing)
